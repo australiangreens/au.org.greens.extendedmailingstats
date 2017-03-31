@@ -7,9 +7,9 @@ This extension provides extended summary reports on CiviCRM mailings
 You can install this from github by doing:
 
     cd [your civicrm extensions directory]
-    git clone git@github.com:mc0e/civicrm-extendedmailingstats.git au.org.greens.extendedmailingstats
+    git clone git@github.com:australiangreens/au.org.greens.extendedmailingstats
 
-You will then need to enable the extension module in civicrm by going to using the civicrm admin page at:
+You will then need to enable the extension module in CiviCRM by going to using the CiviCRM admin page at:
 
     'Administer' -> 'Customise data and Screens' -> 'Manage Extensions'
 
@@ -21,7 +21,7 @@ And you'll see  'Extended Mailing Stats' in the list.
 
 ## Cron job setup
 
-Stats are collected by a cron job rather than when the report is collected.  The cron job 
+Stats are collected by a cron job rather than when the report is collected. The cron job 
 needs to be set up to run a command along the lines of:
 
     drush -r /var/www/example.org/htdocs -l example.org -u 1 civicrm-api extendedmailingstats.cron auth=0 -y
