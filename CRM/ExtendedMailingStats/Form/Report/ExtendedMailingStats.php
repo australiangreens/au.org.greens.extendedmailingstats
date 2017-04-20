@@ -47,14 +47,19 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
   protected $_charts = array(
     '' => 'Tabular',
     'bar_3dChart' => 'Bar Chart',
-  ); function __construct() {
+  );
+
+  /**
+   * Class constructor.
+   */
+  public function __construct() {
     $this->_columns = array();
 
     $this->_columns['agc_report_mailing_stats'] = array(
       'dao' => 'CRM_Mailing_DAO_Mailing',
       'fields' => array(
         'mailing_id' => array(
-          'title' => ts(''),
+          'title' => ts('Mailing ID'),
           'required' => TRUE,
         ),
         'mailing_name' => array(
@@ -93,20 +98,16 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
           'title' => ts('bounced'),
           'default' => TRUE,
         ),
-        'opened' => array(
-          'title' => ts('opened'),
+        'opened_total' => array(
+          'title' => ts('Total Opens'),
           'default' => TRUE,
         ),
-        'unique_opened' => array(
-          'title' => ts('unique opened'),
+        'opened_unique' => array(
+          'title' => ts('Unique Opens'),
           'default' => TRUE,
         ),
         'unsubscribed' => array(
           'title' => ts('unsubscribed'),
-          'default' => TRUE,
-        ),
-        'opted_out' => array(
-          'title' => ts('opted out'),
           'default' => TRUE,
         ),
         'forwarded' => array(
@@ -129,32 +130,12 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
           'title' => ts('clicked_contribution_page'),
           'default' => TRUE,
         ),
-        'contributions_48hrs_count' => array(
-          'title' => ts('contributions_48hrs_count'),
+        'contributions_count' => array(
+          'title' => ts('contributions_count'),
           'default' => TRUE,
         ),
-        'contributions_48hrs_total' => array(
-          'title' => ts('contributions_48hrs_total'),
-          'default' => TRUE,
-        ),
-        'gmail_recipients' => array(
-          'title' => ts('gmail_recipients'),
-          'default' => TRUE,
-        ),
-        'gmail_delivered' => array(
-          'title' => ts('gmail_delivered'),
-          'default' => TRUE,
-        ),
-        'gmail_opened' => array(
-          'title' => ts('gmail_opened'),
-          'default' => TRUE,
-        ),
-        'gmail_clicked_total' => array(
-          'title' => ts('gmail_clicked_total'),
-          'default' => TRUE,
-        ),
-        'gmail_clicked_unique' => array(
-          'title' => ts('gmail_clicked_unique'),
+        'contributions_total' => array(
+          'title' => ts('contributions_total'),
           'default' => TRUE,
         ),
       ),
@@ -182,12 +163,36 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
           'operatorType' => CRM_Report_Form::OP_DATE,
           'type' => CRM_Utils_Type::T_DATE,
         ),
+        'recipients' => array(
+          'title' => ts('Number of Recipients'),
+          'operatorType' => CRM_Report_Form::OP_INT,
+          'type' => CRM_Utils_Type::T_INT,
+        ),
+        'Clicked_contribution_page' => array(
+          'title' => ts('Clicked Contribution Page?'),
+          'operatorType' => CRM_Report_Form::OP_INT,
+          'type' => CRM_Utils_Type::T_INT,
+        ),
       ),
     );
 
-
-
-
+    $this->_columns['civicrm_mailing'] = array(
+      'fields' => array(
+        'mailing_campaign_id' => array(
+          'title' => ts('Campaign'),
+          'name' => 'campaign_id',
+          'type' => CRM_Utils_Type::T_INT,
+        ),
+      ),
+      'filters' => array(
+        'mailing_campaign_id' => array(
+          'title' => ts('Campaign'),
+          'name' => 'campaign_id',
+          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+          'type' => CRM_Utils_Type::T_INT,
+          'options' => CRM_Mailing_BAO_Mailing::buildOptions('campaign_id'),
+        ),
+      ));
 
     parent::__construct();
   }
@@ -207,67 +212,14 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
     return $data;
   }
 
-  // function preProcess() {
-  //   $this->assign('chartSupported', TRUE);
-  //   parent::preProcess();
-  // }
-
-  // manipulate the select function to query count functions
-/*  function select() {
-
-    $count_tables = array(
-      'agc_report_mailing_stats',
-    );
-
-    $select = array();
-    $this->_columnHeaders = array();
-    foreach ($this->_columns as $tableName => $table) {
-      if (array_key_exists('fields', $table)) {
-        foreach ($table['fields'] as $fieldName => $field) {
-          if (CRM_Utils_Array::value('required', $field) ||
-            CRM_Utils_Array::value($fieldName, $this->_params['fields'])
-          ) {
-
-            # for statistics
-            if (CRM_Utils_Array::value('statistics', $field)) {
-              switch ($field['statistics']['calc']) {
-                case 'PERCENTAGE':
-                  $base_table_column = explode('.', $field['statistics']['base']);
-                  $top_table_column = explode('.', $field['statistics']['top']);
-
-                  $select[] = "CONCAT(round(
-                                        count(DISTINCT {$this->_columns[$top_table_column[0]]['fields'][$top_table_column[1]]['dbAlias']}) / 
-                                        count(DISTINCT {$this->_columns[$base_table_column[0]]['fields'][$base_table_column[1]]['dbAlias']}) * 100, 2
-                                    ), '%') as {$tableName}_{$fieldName}";
-                  break;
-              }
-            }
-            else {
-              if (in_array($tableName, $count_tables)) {
-                $select[] = "count(DISTINCT {$field['dbAlias']}) as {$tableName}_{$fieldName}";
-              }
-              else {
-                $select[] = "{$field['dbAlias']} as {$tableName}_{$fieldName}";
-              }
-            }
-            $this->_columnHeaders["{$tableName}_{$fieldName}"]['type'] = CRM_Utils_Array::value('type', $field);
-            $this->_columnHeaders["{$tableName}_{$fieldName}"]['title'] = $field['title'];
-          }
-        }
-      }
-    }
-
-    $this->_select = "SELECT " . implode(', ', $select) . " ";
-    //print_r($this->_select);
-  }
-*/
   function from() {
 
     $this->_from = "
-        FROM agc_report_mailing_stats {$this->_aliases['agc_report_mailing_stats']}
-        INNER JOIN civicrm_mailing mailing_civireport ON mailing_civireport.id = {$this->_aliases['agc_report_mailing_stats']}.mailing_id";
+      FROM civicrm_mailing_stats {$this->_aliases['civicrm_mailing_stats']}
+      LEFT JOIN civicrm_mailing {$this->_aliases['civicrm_mailing']} ON
+        {$this->_aliases['civicrm_mailing_stats']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id
+      ";
     // need group by and order by
-    $this->_aliases['civicrm_mailing'] = 'mailing_civireport';
 
     //print_r($this->_from);
   }
@@ -275,7 +227,7 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
   function where() {
     $clauses = array();
     //to avoid the sms listings
-    $clauses[] = "{$this->_aliases['civicrm_mailing']}.sms_provider_id IS NULL";
+    $clauses[] = "{$this->_aliases['civicrm_mailing_stats']}.sms_provider_id IS NULL";
 
     foreach ($this->_columns as $tableName => $table) {
       if (array_key_exists('filters', $table)) {
@@ -348,24 +300,7 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
 
 
   function orderBy() {
-    $this->_orderBy = "\nORDER BY {$this->_aliases['agc_report_mailing_stats']}.finish DESC\n";
-  }
-
-  function postProcess() {
-
-    $this->beginPostProcess();
-
-    // get the acl clauses built before we assemble the query
-    $this->buildACLClause(CRM_Utils_Array::value('civicrm_contact', $this->_aliases));
-
-    $sql = $this->buildQuery(TRUE);
-
-    $rows = $graphRows = array();
-    $this->buildRows($sql, $rows);
-
-    $this->formatDisplay($rows);
-    $this->doTemplateAssignment($rows);
-    $this->endPostProcess($rows);
+    $this->_orderBy = "\nORDER BY {$this->_aliases['civicrm_mailing_stats']}.finish DESC\n";
   }
 
 
@@ -373,19 +308,25 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
     // custom code to alter rows
     $entryFound = FALSE;
     foreach ($rows as $rowNum => $row) {
+
       // Link mailing name to Civimail Report
-      if (array_key_exists('agc_report_mailing_stats_mailing_name', $row) &&
-        array_key_exists('agc_report_mailing_stats_mailing_id', $row)
+      if (array_key_exists('civicrm_mailing_name', $row) &&
+        array_key_exists('civicrm_mailing_id', $row)
       ) {
-        $url = CRM_Utils_System::url('civicrm/mailing/report',
-            'reset=1&mid=' . $row['agc_report_mailing_stats_mailing_id'],
-            $this->_absoluteUrl
+        $url = CRM_Report_Utils_Report::getNextUrl('civicrm/mailing/report',
+            'reset=1&mid=' . $row['civicrm_mailing_id'],
+            $this->_absoluteUrl, $this->_id
         );
-        $rows[$rowNum]['agc_report_mailing_stats_mailing_name_link'] = $url;
-        $rows[$rowNum]['agc_report_mailing_stats_mailing_name_hover'] = ts("View CiviMail Report for this mailing.");
+        $rows[$rowNum]['civicrm_mailing_name_link'] = $url;
+        $rows[$rowNum]['civicrm_mailing_name_hover'] = ts("View CiviMail Report for this mailing.");
         $entryFound = TRUE;
       }
 
+      if (!empty($row['civicrm_mailing_mailing_campaign_id'])) {
+        $campaigns = CRM_Mailing_BAO_Mailing::buildOptions('campaign_id');
+        $rows[$rowNum]['civicrm_mailing_mailing_campaign_id'] = $campaigns[$row['civicrm_mailing_mailing_campaign_id']];
+        $entryFound = TRUE;
+      }
 
       // skip looking further in rows, if first row itself doesn't
       // have the column we need

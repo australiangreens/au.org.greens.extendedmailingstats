@@ -11,8 +11,8 @@ return array (
     'params' => 
     array (
       'version' => 3,
-      'label' => 'ExtendedMailingStats',
-      'description' => 'ExtendedMailingStats (au.org.greens.extendedmailingstats)',
+      'label' => 'Extended Mailing Stats',
+      'description' => 'An extended version of the Mail Summary Report',
       'class_name' => 'CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats',
       'report_url' => 'au.org.greens.extendedmailingstats/extendedmailingstats',
       'component' => 'CiviMail',
