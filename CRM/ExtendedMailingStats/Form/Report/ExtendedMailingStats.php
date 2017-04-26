@@ -41,7 +41,7 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
   # just a toggle we use to build the from
   protected $_mailingidField = FALSE;
 
-  protected $_customGroupExtends = array();
+  protected $_customGroupExtends = array('Campaign');
 
 
   protected $_charts = array(
@@ -54,8 +54,30 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
    */
   public function __construct() {
     $this->_columns = array();
+    if (CRM_Campaign_BAO_Campaign::isCampaignEnable()) {
+      $this->_columns['civicrm_mailing'] = array(
+        'fields' => array(
+          'mailing_campaign_id' => array(
+            'title' => ts('Campaign'),
+            'name' => 'campaign_id',
+            'type' => CRM_Utils_Type::T_INT,
+          ),
+        ),
+        'filters' => array(
+          'mailing_campaign_id' => array(
+            'title' => ts('Campaign'),
+            'name' => 'campaign_id',
+            'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+            'type' => CRM_Utils_Type::T_INT,
+            'options' => CRM_Mailing_BAO_Mailing::buildOptions('campaign_id'),
+          ),
+        )
+      );
+    }
 
-    $this->_columns['agc_report_mailing_stats'] = array(
+    $this->_columns = array_merge($this->_columns, $this->getCampaignColumns());
+
+    $this->_columns['civicrm_mailing_stats'] = array(
       'dao' => 'CRM_Mailing_DAO_Mailing',
       'fields' => array(
         'mailing_id' => array(
@@ -80,7 +102,6 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         ),
         'finish' => array(
           'title' => ts('End Date'),
-          'default' => TRUE,
         ),
         'recipients' => array(
           'title' => ts('recipients'),
@@ -159,7 +180,6 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         ),
         'finish' => array(
           'title' => ts('End Date'),
-          'default' => 'this.year',
           'operatorType' => CRM_Report_Form::OP_DATE,
           'type' => CRM_Utils_Type::T_DATE,
         ),
@@ -175,24 +195,6 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         ),
       ),
     );
-
-    $this->_columns['civicrm_mailing'] = array(
-      'fields' => array(
-        'mailing_campaign_id' => array(
-          'title' => ts('Campaign'),
-          'name' => 'campaign_id',
-          'type' => CRM_Utils_Type::T_INT,
-        ),
-      ),
-      'filters' => array(
-        'mailing_campaign_id' => array(
-          'title' => ts('Campaign'),
-          'name' => 'campaign_id',
-          'operatorType' => CRM_Report_Form::OP_MULTISELECT,
-          'type' => CRM_Utils_Type::T_INT,
-          'options' => CRM_Mailing_BAO_Mailing::buildOptions('campaign_id'),
-        ),
-      ));
 
     parent::__construct();
   }
@@ -219,9 +221,12 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
       LEFT JOIN civicrm_mailing {$this->_aliases['civicrm_mailing']} ON
         {$this->_aliases['civicrm_mailing_stats']}.mailing_id = {$this->_aliases['civicrm_mailing']}.id
       ";
-    // need group by and order by
-
-    //print_r($this->_from);
+    if ($this->isTableSelected('civicrm_campaign')) {
+      $this->_from .= "
+        LEFT JOIN civicrm_campaign {$this->_aliases['civicrm_campaign']}
+        ON {$this->_aliases['civicrm_campaign']}.id = {$this->_aliases['civicrm_mailing']}.campaign_id
+      ";
+    }
   }
 
   function where() {
@@ -334,6 +339,115 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         break;
       }
     }
+  }
+
+  /**
+   *
+   * @param array
+   *
+   * @return array
+   */
+  function getCampaignColumns() {
+
+    if (!CRM_Campaign_BAO_Campaign::isCampaignEnable()) {
+      return array('civicrm_campaign' => array('fields' => array(), 'metadata' => array()));
+    }
+    $specs = array(
+      'campaign_type_id' => array(
+        'title' => ts('Campaign Type'),
+        'is_filters' => TRUE,
+        'is_order_bys' => TRUE,
+        'is_fields' => TRUE,
+        'is_group_bys' => TRUE,
+        'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+        'options' => CRM_Campaign_BAO_Campaign::buildOptions('campaign_type_id'),
+        'alter_display' => 'alterCampaignType',
+      ),
+      'id' => array(
+        'title' => ts('Campaign'),
+        'is_filters' => TRUE,
+        'is_order_bys' => TRUE,
+        'is_fields' => TRUE,
+        'is_group_bys' => TRUE,
+        'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+        'options' => CRM_Campaign_BAO_Campaign::getCampaigns(),
+        'alter_display' => 'alterCampaign',
+      ),
+      'goal_revenue' => array(
+        'title' => ts('Revenue goal'),
+        'is_filters' => TRUE,
+        'is_order_bys' => TRUE,
+        'is_fields' => TRUE,
+        'type' => CRM_Utils_Type::T_MONEY,
+      ),
+    );
+    return $this->buildColumns($specs, 'civicrm_campaign', 'CRM_Campaign_BAO_Campaign');
+  }
+
+  /**
+   * Build the columns.
+   *
+   * The normal report class needs you to remember to do a few things that are often erratic
+   * 1) use a unique key for any field that might not be unique (e.g. start date, label)
+   * - this class will always prepend an alias to the key & set the 'name' if you don't set it yourself.
+   * - note that it assumes the value being passed in is the actual table fieldname
+   *
+   * 2) set the field & set it to no display if you don't want the field but you might want to use the field in other
+   * contexts - the code looks up the fields array for data - so it both defines the field spec & the fields you want to show
+   *
+   * @param array $specs
+   * @param string $tableName
+   * @param string $tableAlias
+   * @param string $daoName
+   * @param array $defaults
+   *
+   * @return array
+   */
+  function buildColumns($specs, $tableName, $daoName = NULL, $tableAlias = NULL, $defaults = array(), $options = array()) {
+    if (!$tableAlias) {
+      $tableAlias = str_replace('civicrm_', '', $tableName);
+    }
+    $types = array('filters', 'group_bys', 'order_bys', 'join_filters');
+    $columns = array($tableName => array_fill_keys($types, array()));
+    if (!empty($daoName)) {
+      if (stristr($daoName, 'BAO')) {
+        $columns[$tableName]['bao'] = $daoName;
+      }
+      else {
+        $columns[$tableName]['dao'] = $daoName;
+      }
+    }
+    if ($tableAlias) {
+      $columns[$tableName]['alias'] = $tableAlias;
+    }
+
+    foreach ($specs as $specName => $spec) {
+      unset($spec['default']);
+      if (empty($spec['name'])) {
+        $spec['name'] = $specName;
+      }
+
+      $fieldAlias = $tableAlias . '_' . $specName;
+      $columns[$tableName]['metadata'][$fieldAlias] = $spec;
+      $columns[$tableName]['fields'][$fieldAlias] = $spec;
+      if (isset($defaults['fields_defaults']) && in_array($spec['name'], $defaults['fields_defaults'])) {
+        $columns[$tableName]['fields'][$fieldAlias]['default'] = TRUE;
+      }
+
+      if (empty($spec['is_fields']) || (isset($options['fields_excluded']) && in_array($specName, $options['fields_excluded']))) {
+        $columns[$tableName]['fields'][$fieldAlias]['no_display'] = TRUE;
+      }
+
+      foreach ($types as $type) {
+        if (!empty($spec['is_' . $type])) {
+          $columns[$tableName][$type][$fieldAlias] = $spec;
+          if (isset($defaults[$type . '_defaults']) && isset($defaults[$type . '_defaults'][$spec['name']])) {
+            $columns[$tableName][$type][$fieldAlias]['default'] = $defaults[$type . '_defaults'][$spec['name']];
+          }
+        }
+      }
+    }
+    return $columns;
   }
 }
 
