@@ -151,11 +151,11 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
           'title' => ts('clicked_contribution_page'),
           'default' => TRUE,
         ),
-        'contributions_count' => array(
-          'title' => ts('contributions_count'),
+        'contribution_count' => array(
+          'title' => ts('Contribution Count'),
           'default' => TRUE,
         ),
-        'contributions_total' => array(
+        'contribution_total' => array(
           'title' => ts('contributions_total'),
           'default' => TRUE,
         ),
@@ -294,14 +294,6 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
     }
 
   }
-
-  // function groupBy() {
-  //   $this->_groupBy = "\nGROUP BY {$this->_aliases['civicrm_mailing']}.id";
-  // }
-
-  // function having() {
-  //   $this->_having = "";
-  // }
 
 
   function orderBy() {

@@ -7,15 +7,21 @@
   <comment>MailingStats class</comment>
   <log>true</log>
   <field>
-    <name>mailing_id</name>
+    <name>id</name>
     <type>int unsigned</type>
     <required>true</required>
     <comment>Unique ID</comment>
   </field>
   <primaryKey>
-    <name>mailing_id</name>
-    <autoincrement>false</autoincrement>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
   </primaryKey>
+  <field>
+    <name>mailing_id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Mailing ID</comment>
+  </field>
   <field>
     <name>mailing_name</name>
     <comment>Title of mailing</comment>

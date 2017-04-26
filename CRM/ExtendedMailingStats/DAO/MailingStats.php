@@ -50,8 +50,16 @@ class CRM_ExtendedMailingStats_DAO_MailingStats extends CRM_Core_DAO {
    * @var boolean
    */
   static $_log = true;
+
   /**
    * Unique ID
+   *
+   * @var int unsigned
+   */
+  public $id;
+
+  /**
+   * Mailing ID
    *
    * @var int unsigned
    */
@@ -169,8 +177,8 @@ class CRM_ExtendedMailingStats_DAO_MailingStats extends CRM_Core_DAO {
   static function &fields() {
     if (!isset(Civi::$statics[__CLASS__]['fields'])) {
       Civi::$statics[__CLASS__]['fields'] = array(
-        'mailing_id' => array(
-          'name' => 'mailing_id',
+        'id' => array(
+          'name' => 'id',
           'type' => CRM_Utils_Type::T_INT,
           'description' => 'Unique ID',
           'required' => true,
@@ -178,7 +186,17 @@ class CRM_ExtendedMailingStats_DAO_MailingStats extends CRM_Core_DAO {
           'entity' => 'MailingStats',
           'bao' => 'CRM_ExtendedMailingStats_DAO_MailingStats',
           'localizable' => 0,
-        ) ,
+        ),
+        'mailing_id' => array(
+          'name' => 'mailing_id',
+          'type' => CRM_Utils_Type::T_INT,
+          'description' => 'Mailing ID',
+          'required' => true,
+          'table_name' => 'civicrm_mailing_stats',
+          'entity' => 'MailingStats',
+          'bao' => 'CRM_ExtendedMailingStats_DAO_MailingStats',
+          'localizable' => 0,
+        ),
         'mailing_name' => array(
           'name' => 'mailing_name',
           'type' => CRM_Utils_Type::T_STRING,
