@@ -82,7 +82,7 @@ function _extendedmailingstats_cron($params) {
   _extendedmailingstats_cron_recipients($params, 'Collect number of recipients',0);
   _extendedmailingstats_cron_recipients($params, 'Collect number of Gmail recipients',1);
 
-  _extendedmailingstats_cron_event($params, 'delivered', 
+  _extendedmailingstats_cron_event($params, 'delivered',
     array (
       'event_type' => "civicrm_mailing_event_delivered",
       'select' => array(
@@ -375,9 +375,7 @@ CREATE  TABLE IF NOT EXISTS agc_report_mailing_stats (
   send_rate FLOAT UNSIGNED NULL,
   bounced INT UNSIGNED NULL,
   opened INT UNSIGNED NULL,
-  unique_opened INT UNSIGNED NULL,
   unsubscribed INT UNSIGNED NULL,
-  opted_out INT UNSIGNED NULL,
   forwarded INT UNSIGNED NULL,
   clicked_total INT UNSIGNED NULL,
   clicked_unique INT UNSIGNED NULL,
@@ -576,5 +574,20 @@ function _extendedmailingstats_cron_done ($params) {
 INSERT INTO agc_report_mailing_stats_performance (doing) VALUES ("Done");
 END;
   _extendedmailingstats_do_query($params, $sql);
+}
+
+
+/**
+ * Implements hook_civicrm_entityTypes.
+ *
+ * @param array $entityTypes
+ *   Registered entity types.
+ */
+function extendedmailingstats_civicrm_entityTypes(&$entityTypes) {
+  $entityTypes['CRM_ExtendedMailingStats_DAO_MailingStats'] = array(
+    'name' => 'MailingStats',
+    'class' => 'CRM_ExtendedMailingStats_DAO_MailingStats',
+    'table' => 'civicrm_mailingstats',
+  );
 }
 
