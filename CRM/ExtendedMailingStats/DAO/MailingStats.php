@@ -345,21 +345,6 @@ class CRM_ExtendedMailingStats_DAO_MailingStats extends CRM_Core_DAO {
             'type' => 'Text',
           ),
         ),
-        'blocked' => array(
-          'name' => 'blocked',
-          'type' => CRM_Utils_Type::T_INT,
-          'title' => ts('Number of Blocks'),
-          'description' => ts('Blocks represent administrative blocks such as blacklisting or lack of whitelisting by the email provider'),
-          'required' => false,
-          'default' => 'NULL',
-          'table_name' => 'civicrm_mailing_stats',
-          'entity' => 'MailingStats',
-          'bao' => 'CRM_ExtendedMailingStats_DAO_MailingStats',
-          'localizable' => 0,
-          'html' => array(
-            'type' => 'Text',
-          ),
-        ),
         'suppressed' => array(
           'name' => 'suppressed',
           'type' => CRM_Utils_Type::T_INT,
@@ -519,7 +504,7 @@ class CRM_ExtendedMailingStats_DAO_MailingStats extends CRM_Core_DAO {
         'contribution_total' => array(
           'name' => 'contribution_total',
           'type' => CRM_Utils_Type::T_FLOAT,
-          'title' => ts('Number Opened') ,
+          'title' => ts('Total Amount Contributed') ,
           'required' => false,
           'default' => 'NULL',
           'table_name' => 'civicrm_mailing_stats',
