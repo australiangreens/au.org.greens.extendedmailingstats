@@ -10,7 +10,7 @@ class CRM_ExtendedMailingStats_Upgrader extends CRM_ExtendedMailingStats_Upgrade
 
   /**
    * Example: Run an external SQL script when the module is installed
-   *
+   */
   public function install() {
     $this->executeSqlFile('sql/myinstall.sql');
   }
