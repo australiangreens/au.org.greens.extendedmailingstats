@@ -10,15 +10,6 @@ function extendedmailingstats_civicrm_config(&$config) {
 }
 
 /**
- * Implementation of hook_civicrm_xmlMenu
- *
- * @param $files array(string)
- */
-function extendedmailingstats_civicrm_xmlMenu(&$files) {
-  _extendedmailingstats_civix_civicrm_xmlMenu($files);
-}
-
-/**
  * Implementation of hook_civicrm_install
  */
 function extendedmailingstats_civicrm_install() {
@@ -26,47 +17,10 @@ function extendedmailingstats_civicrm_install() {
 }
 
 /**
- * Implementation of hook_civicrm_uninstall
- */
-function extendedmailingstats_civicrm_uninstall() {
-  return _extendedmailingstats_civix_civicrm_uninstall();
-}
-
-/**
  * Implementation of hook_civicrm_enable
  */
 function extendedmailingstats_civicrm_enable() {
   return _extendedmailingstats_civix_civicrm_enable();
-}
-
-/**
- * Implementation of hook_civicrm_disable
- */
-function extendedmailingstats_civicrm_disable() {
-  return _extendedmailingstats_civix_civicrm_disable();
-}
-
-/**
- * Implementation of hook_civicrm_upgrade
- *
- * @param $op string, the type of operation being performed; 'check' or 'enqueue'
- * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of pending up upgrade tasks
- *
- * @return mixed  based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
- *                for 'enqueue', returns void
- */
-function extendedmailingstats_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _extendedmailingstats_civix_civicrm_upgrade($op, $queue);
-}
-
-/**
- * Implementation of hook_civicrm_managed
- *
- * Generate a list of entities to create/deactivate/delete when this module
- * is installed, disabled, uninstalled.
- */
-function extendedmailingstats_civicrm_managed(&$entities) {
-  return _extendedmailingstats_civix_civicrm_managed($entities);
 }
 
 /**
@@ -209,7 +163,6 @@ function _extendedmailingstats_cron($params) {
   return true;
 }
 
-
 ################################################################################
 
 function _extendedmailingstats_do_query($params, $sql) {
@@ -227,14 +180,12 @@ function _extendedmailingstats_do_query($params, $sql) {
   }
 }
 
-
 function _extendedmailingstats_record_status($params, $doing) {
   $sql = <<<END
-INSERT INTO agc_report_mailing_stats_performance (doing) VALUES ("${doing}");
+INSERT INTO agc_report_mailing_stats_performance (doing) VALUES ("$doing");
 END;
   _extendedmailingstats_do_query($params, $sql);
 }
-
 
 ################################################################################
 
@@ -251,17 +202,16 @@ function _extendedmailingstats_cron_event($params, $task, $spec) {
   $set_clauses = array();
   foreach($select as $select_into => $select_from) {
       $alias = $event_type . '_' . $select_into;
-      $select_clauses[] = "${select_from} as ${alias}";
-      $set_clauses[] = "agc_report_mailing_stats.$select_into = ifnull(source.${alias},0)";
-      "source.$alias";
+      $select_clauses[] = "$select_from as $alias";
+      $set_clauses[] = "agc_report_mailing_stats.$select_into = ifnull(source.$alias,0)";
   }
 
   $select_clause_str = implode(",\n    ", $select_clauses);
   $set_clauses_str = implode(",\n  ", $set_clauses);
-  
+
   // Are we counting unique opens?
   if (!strcmp($task, "Unique Opened")) {
-    $select_clause_str = "\n    COUNT(DISTINCT eq.contact_id) AS ${alias}";
+    $select_clause_str = "\n    COUNT(DISTINCT eq.contact_id) AS $alias";
   }
 
   // Are we counting gmail addresses only?
@@ -297,10 +247,10 @@ END;
     civicrm_mailing_job AS j
     JOIN civicrm_mailing_event_queue AS eq
       ON eq.job_id = j.id
-    JOIN ${event_type} eqrec
+    JOIN $event_type eqrec
       ON eqrec.event_queue_id = eq.id
-${gmail_only_str}
-${extra_str}
+$gmail_only_str
+$extra_str
 END;
   }
   elseif (!strcmp($spec['event_type'], 'civicrm_mailing_recipients')) {
@@ -308,8 +258,8 @@ END;
     civicrm_mailing_recipients AS r
     JOIN civicrm_mailing_event_queue AS eq
       ON eq.job_id = j.id
-${gmail_only_str}
-    JOIN ${event_type} eqrec
+$gmail_only_str
+    JOIN $event_type eqrec
       ON eqrec.event_queue_id = eq.id
 END;
   }
@@ -320,15 +270,15 @@ END;
 UPDATE agc_report_mailing_stats
 LEFT JOIN (
   SELECT j.mailing_id AS mailing_id,
-${select_clause_str}
-  FROM 
-${data_model_str}
+$select_clause_str
+  FROM
+$data_model_str
   AND j.is_test = 0
   GROUP BY j.mailing_id
 ) AS source
 ON source.mailing_id = agc_report_mailing_stats.mailing_id
-SET 
-  ${set_clauses_str};
+SET
+  $set_clauses_str;
 END;
 
 
@@ -366,7 +316,7 @@ END;
 CREATE  TABLE IF NOT EXISTS agc_report_mailing_stats (
   mailing_id INT UNSIGNED NOT NULL,
   mailing_name VARCHAR(128),
-  is_completed  TINYINT(4), 
+  is_completed  TINYINT(4),
   created_date TIMESTAMP NULL,
   start TIMESTAMP NULL,
   finish TIMESTAMP NULL,
@@ -400,7 +350,6 @@ END;
   _extendedmailingstats_do_query($params, $sql);
 }
 
-
 ################################################################################
 
 // This needs to be run before most other queries to create the row in the results table
@@ -409,18 +358,16 @@ function _extendedmailingstats_cron_mailing($params) {
   $sql = <<<END
 INSERT  IGNORE INTO agc_report_mailing_stats (mailing_id, mailing_name, created_date, is_completed)
 (
-  SELECT id  AS mailing_id, 
+  SELECT id  AS mailing_id,
     name AS mailing_name,
     created_date AS created_date,
     is_completed AS is_completed
-  FROM civicrm_mailing 
+  FROM civicrm_mailing
   WHERE is_completed=1
 );
 END;
   _extendedmailingstats_do_query($params, $sql);
 }
-
-
 
 ################################################################################
 
@@ -429,9 +376,9 @@ _extendedmailingstats_record_status($params,"Collect info on start and end times
 
   $sql = <<<END
 UPDATE agc_report_mailing_stats JOIN (
-SELECT 
-  mailing_id, 
-  min(start_date) AS start, 
+SELECT
+  mailing_id,
+  min(start_date) AS start,
   max(end_date) AS finish
 FROM civicrm_mailing_job AS j
 WHERE is_test=0
@@ -439,13 +386,12 @@ WHERE is_test=0
 GROUP BY mailing_id
 ) AS source
 ON source.mailing_id = agc_report_mailing_stats.mailing_id
-SET 
+SET
   agc_report_mailing_stats.start = source.start,
   agc_report_mailing_stats.finish = source.finish;
 END;
   _extendedmailingstats_do_query($params, $sql);
 }
-
 
 function _extendedmailingstats_cron_recipients($params, $task, $gmail_only=0) {
 
@@ -464,18 +410,18 @@ else {
 _extendedmailingstats_record_status($params,$task);
 
   $sql = <<<END
-UPDATE agc_report_mailing_stats 
+UPDATE agc_report_mailing_stats
 LEFT JOIN (
-SELECT 
-  mailing_id, 
+SELECT
+  mailing_id,
   count(r.contact_id) AS recipients
 FROM civicrm_mailing_recipients AS r
-${gmail_join}
+$gmail_join
 GROUP BY mailing_id
 ) AS source
 ON source.mailing_id = agc_report_mailing_stats.mailing_id
-SET 
-  agc_report_mailing_stats.${result_row} = ifnull(source.recipients,0);
+SET
+  agc_report_mailing_stats.$result_row = ifnull(source.recipients,0);
 END;
   _extendedmailingstats_do_query($params, $sql);
 }
@@ -492,13 +438,12 @@ LEFT JOIN (
   GROUP BY mailing_id
 ) AS source
 ON source.mailing_id = agc_report_mailing_stats.mailing_id
-SET 
+SET
   agc_report_mailing_stats.trackable_urls = ifnull(source.count,0);
 
 END;
   _extendedmailingstats_do_query($params, $sql);
 }
-
 
 function _extendedmailingstats_cron_contribution_page_clicks ($params) {
 _extendedmailingstats_record_status($params,"contribution_page_clicks");
@@ -507,7 +452,7 @@ UPDATE agc_report_mailing_stats
 LEFT JOIN (
   SELECT j.mailing_id AS mailing_id,
     count(q.id) AS count
-  FROM 
+  FROM
     civicrm_mailing_job AS j
     JOIN civicrm_mailing_event_queue AS q
       ON q.job_id = j.id
@@ -519,32 +464,31 @@ LEFT JOIN (
   GROUP BY j.mailing_id
 ) AS source
 ON source.mailing_id = agc_report_mailing_stats.mailing_id
-SET 
+SET
   agc_report_mailing_stats.clicked_contribution_page = ifnull(source.count,0);
 
 END;
   _extendedmailingstats_do_query($params, $sql);
 }
 
-
 // If any value other than 48 hours is to be used, an appropriately named column needs to be added to the results table
 function _extendedmailingstats_cron_contributions ($params, $hours = 48) {
-_extendedmailingstats_record_status($params,"contributions_${hours}hrs");
+_extendedmailingstats_record_status($params,"contributions_{$hours}hrs");
   $sql = <<<END
 UPDATE agc_report_mailing_stats
 LEFT JOIN (
-SELECT 
+SELECT
     cm.id AS mailing_id,
     count(cc.id) AS count,
     sum(cc.total_amount) AS sum
-  FROM 
+  FROM
     civicrm_mailing AS cm
     straight_join civicrm_mailing_trackable_url AS cmtu
         ON cmtu.mailing_id = cm.id
         AND cmtu.url rlike '.*/civicrm/contribute/transact.*'
     straight_join civicrm_contribution AS cc
         ON cc.contribution_page_id  = SUBSTRING_INDEX(SUBSTRING_INDEX(cmtu.url, 'id=', -1), '&', 1)
-        AND cc.receive_date BETWEEN cm.scheduled_date AND date_add(cm.scheduled_date,interval ${hours} hour)
+        AND cc.receive_date BETWEEN cm.scheduled_date AND date_add(cm.scheduled_date,interval $hours hour)
     straight_join civicrm_mailing_recipients AS cmr
         ON  cm.id = cmr.mailing_id
         AND cmr.contact_id = cc.contact_id
@@ -552,9 +496,9 @@ SELECT
 GROUP BY cm.id
 ) AS source
 ON source.mailing_id = agc_report_mailing_stats.mailing_id
-SET 
-  agc_report_mailing_stats.contributions_${hours}hrs_count = ifnull(source.count,0),
-  agc_report_mailing_stats.contributions_${hours}hrs_total = ifnull(source.sum,0);
+SET
+  agc_report_mailing_stats.contributions_{$hours}hrs_count = ifnull(source.count,0),
+  agc_report_mailing_stats.contributions_{$hours}hrs_total = ifnull(source.sum,0);
 END;
   _extendedmailingstats_do_query($params, $sql);
 }
@@ -576,18 +520,11 @@ END;
   _extendedmailingstats_do_query($params, $sql);
 }
 
-
-/**
- * Implements hook_civicrm_entityTypes.
- *
- * @param array $entityTypes
- *   Registered entity types.
- */
-function extendedmailingstats_civicrm_entityTypes(&$entityTypes) {
-  $entityTypes['CRM_ExtendedMailingStats_DAO_MailingStats'] = array(
-    'name' => 'MailingStats',
-    'class' => 'CRM_ExtendedMailingStats_DAO_MailingStats',
-    'table' => 'civicrm_mailingstats',
-  );
-}
-
+// /**
+//  * Implements hook_civicrm_entityTypes().
+//  *
+//  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
+//  */
+// function extendedmailingstats_civicrm_entityTypes(&$entityTypes) {
+//   _extendedmailingstats_civix_civicrm_entityTypes($entityTypes);
+// }
