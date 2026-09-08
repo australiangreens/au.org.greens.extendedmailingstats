@@ -81,4 +81,20 @@ class CRM_ExtendedMailingStats_Upgrader extends CRM_Extension_Upgrader_Base {
     return TRUE;
   } // */
 
+  /**
+   * Widen mailing_name per current entity defn.
+   *
+   * @return TRUE on success
+   * @throws Exception
+   */
+  public function upgrade_4204() {
+    $this->ctx->log->info('Applying update 4204');
+    CRM_Core_DAO::executeQuery(
+      'ALTER TABLE civicrm_mailing_stats
+      MODIFY COLUMN mailing_name VARCHAR(255)
+    ');
+    return TRUE;
+  }
+
+
 }
