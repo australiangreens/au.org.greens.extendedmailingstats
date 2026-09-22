@@ -37,122 +37,122 @@ function _extendedmailingstats_cron($params) {
   _extendedmailingstats_cron_recipients($params, 'Collect number of Gmail recipients',1);
 
   _extendedmailingstats_cron_event($params, 'delivered',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_delivered",
-      'select' => array(
+      'select' => [
         "delivered" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'gmail_delivered',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_delivered",
-      'select' => array(
+      'select' => [
         "gmail_delivered" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 1,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Total clicks',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_trackable_url_open",
-      'select' => array(
+      'select' => [
         "clicked_total" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Gmail Total clicks',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_trackable_url_open",
-      'select' => array(
+      'select' => [
         "gmail_clicked_total" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 1,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Unique clicks',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_trackable_url_open",
-      'select' => array(
+      'select' => [
         "clicked_unique" => "count(distinct eq.contact_id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Gmail Unique clicks',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_trackable_url_open",
-      'select' => array(
+      'select' => [
         "gmail_clicked_unique" => "count(distinct eq.contact_id)",
-      ),
+      ],
       'gmail_only' => 1,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'forwarded',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_forward",
-      'select' => array(
+      'select' => [
         "forwarded" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Unsubscribed',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_unsubscribe",
-      'select' => array(
+      'select' => [
         "unsubscribed" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Opted out',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_unsubscribe",
-      'select' => array(
+      'select' => [
         "opted_out" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Bounced',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_bounce",
-      'select' => array(
+      'select' => [
         "bounced" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Opened',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_opened",
-      'select' => array(
+      'select' => [
         "opened" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
   _extendedmailingstats_cron_event($params, 'Unique Opened',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_opened",
-      'select' => array(
+      'select' => [
         "unique_opened" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 0,
-    )
+    ]
   );
 
   _extendedmailingstats_cron_event($params, 'Gmail Opened',
-    array (
+    [
       'event_type' => "civicrm_mailing_event_opened",
-      'select' => array(
+      'select' => [
         "gmail_opened" => "count(eqrec.id)",
-      ),
+      ],
       'gmail_only' => 1,
-    )
+    ]
   );
 
   _extendedmailingstats_cron_trackable_urls($params);
@@ -198,8 +198,8 @@ function _extendedmailingstats_cron_event($params, $task, $spec) {
   $gmail_only = $spec['gmail_only'];
 
 
-  $select_clauses = array();
-  $set_clauses = array();
+  $select_clauses = [];
+  $set_clauses = [];
   foreach($select as $select_into => $select_from) {
       $alias = $event_type . '_' . $select_into;
       $select_clauses[] = "$select_from as $alias";

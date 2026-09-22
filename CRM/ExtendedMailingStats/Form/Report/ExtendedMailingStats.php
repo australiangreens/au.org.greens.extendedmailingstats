@@ -34,43 +34,43 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
 
   protected $_summary = NULL;
 
-  protected $_customGroupExtends = array('Campaign');
+  protected $_customGroupExtends = ['Campaign'];
 
 
-  protected $_charts = array(
+  protected $_charts = [
     '' => 'Tabular',
     'bar_3dChart' => 'Bar Chart',
-  );
+  ];
 
   /**
    * Class constructor.
    */
   public function __construct() {
-    $this->_columns = array();
+    $this->_columns = [];
     if (CRM_Campaign_BAO_Campaign::isComponentEnabled()) {
-      $this->_columns['civicrm_mailing'] = array(
-        'fields' => array(
-          'mailing_id' => array(
+      $this->_columns['civicrm_mailing'] = [
+        'fields' => [
+          'mailing_id' => [
             'title' => ts('Mailing ID'),
             'name' => 'id',
             'required' => TRUE,
-          ),
-          'mailing_campaign_id' => array(
+          ],
+          'mailing_campaign_id' => [
             'title' => ts('Campaign'),
             'name' => 'campaign_id',
             'type' => CRM_Utils_Type::T_INT,
-          ),
-        ),
-        'filters' => array(
-          'mailing_campaign_id' => array(
+          ],
+        ],
+        'filters' => [
+          'mailing_campaign_id' => [
             'title' => ts('Campaign'),
             'name' => 'campaign_id',
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
             'type' => CRM_Utils_Type::T_INT,
             'options' => CRM_Mailing_BAO_Mailing::buildOptions('campaign_id'),
-          ),
-        )
-      );
+          ],
+        ]
+      ];
     }
 
     $this->_columns = array_merge($this->_columns, $this->getCampaignColumns(), $this->getMailingStatColumns());
@@ -96,7 +96,7 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
 
   function mailing_select() {
 
-    $data = array();
+    $data = [];
 
     $mailing = new CRM_Mailing_BAO_Mailing();
     $query = "SELECT name FROM civicrm_mailing WHERE sms_provider_id IS NULL";
@@ -125,7 +125,7 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
   }
 
   function where() {
-    $clauses = array();
+    $clauses = [];
     //to avoid the sms listings
     $clauses[] = "{$this->_aliases['civicrm_mailing_stats']}.sms_provider_id IS NULL";
 
@@ -200,7 +200,7 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
     // custom code to alter rows
     $entryFound = FALSE;
     foreach ($rows as $rowNum => &$row) {
-      $checkedColumns = array('civicrm_mailing_stats_mailing_stats_mailing_name', 'civicrm_mailing_mailing_id', 'civicrm_mailing_mailing_campaign_id');
+      $checkedColumns = ['civicrm_mailing_stats_mailing_stats_mailing_name', 'civicrm_mailing_mailing_id', 'civicrm_mailing_mailing_campaign_id'];
 
       foreach ($checkedColumns as $columnName) {
         if (isset($row[$columnName])) {
@@ -243,35 +243,35 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
    * @return array
    */
   function getMailingStatColumns() {
-    $specs = array(
-      'mailing_name' => array(
+    $specs = [
+      'mailing_name' => [
         'title' => ts('Mailing Name'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_STRING,
-      ),
-      'is_completed' => array(
+      ],
+      'is_completed' => [
         'title' => ts('Is Completed'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'operatorType' => CRM_Report_Form::OP_SELECT,
         'type' => CRM_Utils_Type::T_INT,
-        'options' => array(
+        'options' => [
           1 => 'Complete',
           0 => 'Incomplete',
-        ),
-      ),
-      'created_date' => array(
+        ],
+      ],
+      'created_date' => [
         'title' => ts('Date Created'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'operatorType' => CRM_Report_Form::OP_DATE,
         'type' => CRM_Utils_Type::T_DATE,
-      ),
-      'start' => array(
+      ],
+      'start' => [
         'title' => ts('Start Date'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
@@ -279,16 +279,16 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         'default' => TRUE,
         'operatorType' => CRM_Report_Form::OP_DATE,
         'type' => CRM_Utils_Type::T_DATE,
-      ),
-      'finish' => array(
+      ],
+      'finish' => [
         'title' => ts('End Date'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'operatorType' => CRM_Report_Form::OP_DATE,
         'type' => CRM_Utils_Type::T_DATE,
-      ),
-      'recipients' => array(
+      ],
+      'recipients' => [
         'title' => ts('Number Sent'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
@@ -296,88 +296,88 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         'default' => TRUE,
         'operatorType' => CRM_Report_Form::OP_INT,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'delivered' => array(
+      ],
+      'delivered' => [
         'title' => ts('Number delivered'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'send_rate' => array(
+      ],
+      'send_rate' => [
         'title' => ts('Send Rate'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'bounced' => array(
+      ],
+      'bounced' => [
         'title' => ts('bounced'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'suppressed' => array(
+      ],
+      'suppressed' => [
         'title' => ts('Number Supressed by Provider'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'opened_total' => array(
+      ],
+      'opened_total' => [
         'title' => ts('Total Opens'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'opened_unique' => array(
+      ],
+      'opened_unique' => [
         'title' => ts('Unique Opens'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'default' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'unsubscribed' => array(
+      ],
+      'unsubscribed' => [
         'title' => ts('unsubscribed'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'default' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'forwarded' => array(
+      ],
+      'forwarded' => [
         'title' => ts('forwarded'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'default' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'clicked_total' => array(
+      ],
+      'clicked_total' => [
         'title' => ts('clicked_total'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_MONEY,
-      ),
-      'clicked_unique' => array(
+      ],
+      'clicked_unique' => [
         'title' => ts('clicked_unique'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'trackable_urls' => array(
+      ],
+      'trackable_urls' => [
         'title' => ts('trackable_urls'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_STRING,
-      ),
-      'clicked_contribution_page' => array(
+      ],
+      'clicked_contribution_page' => [
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
@@ -385,22 +385,22 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         'title' => ts('Clicked Contribution Page?'),
         'operatorType' => CRM_Report_Form::OP_INT,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'contribution_count' => array(
+      ],
+      'contribution_count' => [
         'title' => ts('Contribution Count'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_INT,
-      ),
-      'contribution_total' => array(
+      ],
+      'contribution_total' => [
         'title' => ts('contributions_total'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_MONEY,
-      ),
-    );
+      ],
+    ];
 
     return $this->buildColumns($specs, 'civicrm_mailing_stats', 'CRM_ExtendedMailingStats_BAO_MailingStats');
   }
@@ -413,10 +413,10 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
   function getCampaignColumns() {
 
     if (!CRM_Campaign_BAO_Campaign::isComponentEnabled()) {
-      return array('civicrm_campaign' => array('fields' => array(), 'metadata' => array()));
+      return ['civicrm_campaign' => ['fields' => [], 'metadata' => []]];
     }
-    $specs = array(
-      'campaign_type_id' => array(
+    $specs = [
+      'campaign_type_id' => [
         'title' => ts('Campaign Type'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
@@ -425,8 +425,8 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         'operatorType' => CRM_Report_Form::OP_MULTISELECT,
         'options' => CRM_Campaign_BAO_Campaign::buildOptions('campaign_type_id'),
         'alter_display' => 'alterCampaignType',
-      ),
-      'id' => array(
+      ],
+      'id' => [
         'title' => ts('Campaign'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
@@ -435,15 +435,15 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
         'operatorType' => CRM_Report_Form::OP_MULTISELECT,
         'options' => CRM_Campaign_BAO_Campaign::getCampaigns(),
         'alter_display' => 'alterCampaign',
-      ),
-      'goal_revenue' => array(
+      ],
+      'goal_revenue' => [
         'title' => ts('Revenue goal'),
         'is_filters' => TRUE,
         'is_order_bys' => TRUE,
         'is_fields' => TRUE,
         'type' => CRM_Utils_Type::T_MONEY,
-      ),
-    );
+      ],
+    ];
     return $this->buildColumns($specs, 'civicrm_campaign', 'CRM_Campaign_BAO_Campaign');
   }
 
@@ -466,12 +466,12 @@ class CRM_ExtendedMailingStats_Form_Report_ExtendedMailingStats extends CRM_Repo
    *
    * @return array
    */
-  function buildColumns($specs, $tableName, $daoName = NULL, $tableAlias = NULL, $defaults = array(), $options = array()) {
+  function buildColumns($specs, $tableName, $daoName = NULL, $tableAlias = NULL, $defaults = [], $options = []) {
     if (!$tableAlias) {
       $tableAlias = str_replace('civicrm_', '', $tableName);
     }
-    $types = array('filters', 'group_bys', 'order_bys', 'join_filters');
-    $columns = array($tableName => array_fill_keys($types, array()));
+    $types = ['filters', 'group_bys', 'order_bys', 'join_filters'];
+    $columns = [$tableName => array_fill_keys($types, [])];
     if (!empty($daoName)) {
       if (stristr($daoName, 'BAO')) {
         $columns[$tableName]['bao'] = $daoName;
